@@ -33,18 +33,19 @@ except(ValueError):
 if port < 0 or port > 65535:
     helpmsg("Error: Puerto fuera del rango válido [0-65535].")
 
-# Crea el socket TCP servidor e intenta conectar con el mismo.
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.connect((ip, port))
-
-
-"""valid = False
+# Pide el nombre de usuario.
+valid = False
 user = input("Nombre: ")
-if len(user) > 0 and len(user) <= 256:
+if len(user) > 0 and len(user) <= 20:
     valid = True
-"""
-print("!q : salir")
 
+# Función de salida.
+def stopandquit():
+    exit = True
+    server.close()
+    sys.exit()
+
+# Hilo de escucha del servidor.
 def serverthread():
     while not exit:
         try:
@@ -57,13 +58,17 @@ def serverthread():
         except:
             break
 
-def stopandquit():
-    exit = True
-    server.close()
-    sys.exit()
+# Crea el socket TCP servidor e intenta conectar con el mismo.
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.connect((ip, port))
 
+# Empieza el hilo de escucha del servidor.
 threading.Thread(target=serverthread).start()
 
+# Ayuda al inicio.
+print("!q : salir")
+
+# Bucle principal. Espera entrada y envía mensajes al servidor.
 while not exit:
     try:
         msg = input()
