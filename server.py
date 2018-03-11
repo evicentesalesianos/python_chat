@@ -10,7 +10,7 @@ import threading
 # Mensaje de ayuda cuando no se proporcionan dos argumentos.
 def helpmsg(str):
     print(str)
-    exit()
+    sys.exit()
 
 if len(sys.argv) != 3:
     helpmsg("Ayuda: "+sys.argv[0]+" IP puerto")
@@ -68,7 +68,7 @@ def clientthread(conn, addr):
             if msg == "!q":
                 msg_send = " - "+addr[0]+" se ha desconectado -"
             else:
-                msg_send = "["+addr[0]+"]: "+msg
+                msg_send = "["+addr[0]+"]"+msg
             print(msg_send)
             broadcast(msg_send, conn)
         except:
@@ -108,4 +108,4 @@ while not exit:
     except: #(KeyboardInterrupt, SystemExit):
         exit = True
         server.close()
-        exit()
+        sys.exit()

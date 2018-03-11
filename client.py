@@ -12,7 +12,7 @@ exit = False
 # Mensaje de ayuda cuando no se proporcionan dos argumentos.
 def helpmsg(str):
     print(str)
-    exit()
+    sys.exit()
 
 if len(sys.argv) != 3:
     helpmsg("Ayuda: "+sys.argv[0]+" IP puerto")
@@ -35,9 +35,10 @@ if port < 0 or port > 65535:
 
 # Pide el nombre de usuario.
 valid = False
-user = input("Nombre: ")
-if len(user) > 0 and len(user) <= 20:
-    valid = True
+while not valid:
+    user = input("Nombre: ")
+    if len(user) > 0 and len(user) <= 20:
+        valid = True
 
 # Función de salida.
 def stopandquit():
@@ -73,7 +74,11 @@ while not exit:
     try:
         msg = input()
         if msg == "!q":
+            server.send(msg.encode("utf-8"))
             exit = True
-        server.send(msg.encode("utf-8"))
+        else:
+            server.send(("["+user+"]: "+msg).encode("utf-8"))
     except: #(KeyboardInterrupt, SystemExit):
         stopandquit()
+
+stopandquit()
