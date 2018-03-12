@@ -4,6 +4,7 @@ Escrito en Python 3.6.4
 """
 
 import sys
+import time
 import socket
 import threading
 
@@ -15,7 +16,12 @@ def helpmsg(str):
 if len(sys.argv) != 3:
     helpmsg("Ayuda: "+sys.argv[0]+" IP puerto")
 
-# Pasa los parámetros a variables y valida el puerto.
+# Valida los parámetros y los pasa a variables.
+try:
+    socket.inet_pton(socket.AF_INET, sys.argv[1])
+except(OSError):
+    helpmsg("Error: dirección IP inválida.")
+
 ip = str(sys.argv[1])
 
 try:
@@ -33,10 +39,10 @@ server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 # Escucha del socket servidor en la IP y el puerto.
 try:
     server.bind((ip, port))
-except(socket.gaierror):
-    helpmsg("Error: dirección IP inválida.")
 except(OSError):
     helpmsg("Error: Puerto ya en uso.")
+except(socket.gaierror):
+    helpmsg("Error: No se ha podido crear el socket en "+ip+":"+port+".")
 
 server.listen(100) # Hasta 100 clientes simultáneos. Editar si es necesario.
 
@@ -52,7 +58,7 @@ def remove(conn):
 # Función de envío de mensajes a todos los clientes.
 def broadcast(msg, conn):
     for c in clients:
-        #if c != conn:
+        #if c != conn: # Descomentar para no enviar los mensajes de vuelta al emisor.
         try:
             c.send(msg.encode("utf-8"))
         except:
@@ -61,16 +67,16 @@ def broadcast(msg, conn):
 
 # Hilos de clientes.
 def clientthread(conn, addr):
-    conn.send((" - Conectado a "+ip+" -").encode("utf-8"))
+    conn.send((time.strftime("%H:%M:%S")+" - Conectado a ["+ip+"] -").encode("utf-8"))
     while not exit:
         try:
             msg = conn.recv(2048).decode("utf-8")
             if msg == "!q":
-                msg_send = " - "+addr[0]+" se ha desconectado -"
+                msg_send = " - ["+addr[0]+"] se ha desconectado -"
             else:
-                msg_send = "["+addr[0]+"]"+msg
-            print(msg_send)
-            broadcast(msg_send, conn)
+                msg_send = " ["+addr[0]+"] "+msg
+            print(time.strftime("%H:%M:%S")+msg_send)
+            broadcast(time.strftime("%H:%M:%S")+msg_send, conn)
         except:
             remove(conn)
             break
@@ -81,7 +87,7 @@ def serverthread():
         try:
             conn, addr = server.accept()
             clients.append(conn)
-            print(" - "+addr[0]+" se ha conectado -")
+            print(time.strftime("%H:%M:%S")+" - ["+addr[0]+"] se ha conectado -")
             threading.Thread(target=clientthread, args=(conn, addr)).start()
         except:
             break
@@ -104,7 +110,7 @@ while not exit:
                 clients.remove(c)
             server.close()
         else:
-            broadcast("[Servidor]: "+msg, None)
+            broadcast(time.strftime("%H:%M:%S")+" [Servidor]: "+msg, None)
     except: #(KeyboardInterrupt, SystemExit):
         exit = True
         server.close()

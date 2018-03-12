@@ -4,9 +4,11 @@ Escrito en Python 3.6.4
 """
 
 import sys
+import time
 import socket
 import threading
 
+# Variable de salida.
 exit = False
 
 # Mensaje de ayuda cuando no se proporcionan dos argumentos.
@@ -52,7 +54,7 @@ def serverthread():
         try:
             msg = server.recv(2048).decode("utf-8")
             if msg == "!q":
-                print(" - El servidor se ha desconectado -")
+                print(time.strftime("%H:%M:%S")+" - El servidor se ha desconectado -")
                 stopandquit()
             else:
                 print(msg)
